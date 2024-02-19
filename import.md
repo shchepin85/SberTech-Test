@@ -19,7 +19,7 @@ _Исходные данные взяты из файла с тестовым з
 
 Под Windows драйвер лучше всего установить из msi-пакета. Если Windows 64-битная, а драйвер 32-битный, то панель управления нужно вызвать вручную:
 
-```text
+```{code}
 c:\windows\system32\odbcad32.exe
 ```
 
@@ -29,7 +29,7 @@ c:\windows\system32\odbcad32.exe
 
 Под unix необходимо знать особенности ОС + поможет поиск в интернет, общая идея - прописать в файл .odbc.ini настройки, примерно так:
 
-```
+```{code}
 [ODBC Data Sources]
   Product = PostgreSQL
 [Product]
@@ -55,7 +55,7 @@ c:\windows\system32\odbcad32.exe
 
 Идем в c:\oracle\product\11.2.0\database\hs\admin\ и в файле initProduct.ora (Product - имя созданного ранее источника, может быть любым, здесь и далее используется Product), который нужно создать вручную, пишем:
 
-```
+```{code}
 HS_FDS_CONNECT_INFO = Product
 HS_FDS_TRACE_LEVEL = 0
 HS_NLS_NCHAR = UCS2
@@ -64,13 +64,13 @@ HS_LANGUAGE = american_america.we8mswin1252
 
 Последняя строка - не опечатка. Можно еще попробовать так:
 
-```
+```{code}
 HS_LANGUAGE = american_america.al32utf8
 ```
 
 Но у меня не заработало. Под unix скорее всего нужно будет добавить еще всяких разных строк:
 
-```text
+```{code}
 HS_FDS_CONNECT_INFO = MoodlePostgres
 HS_FDS_SHAREABLE_NAME = /<path_to_postrges>/psqlodbc.so
 HS_FDS_SUPPORT_STATISTICS = FALSE
@@ -79,7 +79,7 @@ HS_KEEP_REMOTE_COLUMN_SIZE = ALL
 
 Далее идем в `c:\oracle\product\11.2.0\database\NETWORK\ADMIN\` и правим файл `listener.ora`, а именно нужно добавить запись в секцию `SID_LIST_LISTENER/SID_LIST`, должно получиться примерно так (первая запись SID_DESC здесь уже была, добавлялись строки для `SID_NAME = Product`):
 
-```text
+```{code}
 SID_LIST_LISTENER =
  (SID_LIST =
  (SID_DESC =
@@ -98,7 +98,7 @@ SID_LIST_LISTENER =
 
 И наконец нужно добавить описание в tnsnames.ora в этом же каталоге (сервер `Product` нужно подставить свой, а порт - стандартный порт Oracle, так и должно быть, это важно):
 
-```text
+```{code}
 Product =
  (DESCRIPTION = 
  (ADDRESS = (PROTOCOL = TCP)(HOST = 127.0.0.1)(PORT = 1521))
@@ -110,13 +110,13 @@ Product =
 
 Теперь нужно перезапустить Oracle Database Listener, и можно выполнить стандартное создание линка (`Product_scr` - пользователь владельца схемы базы `Product`, `password` - его пароль):
 
-```sql
+```{code} sql
 create database link Product connect to "Product_scr" identified by "password" using 'Product';
 ```
 
 Получившийся линк можно использовать почти стандартным образом, примерно так:
 
-```sql
+```{code} sql
 select * from "Product_rate_plans"@Product;
 ```
 
@@ -126,7 +126,7 @@ select * from "Product_rate_plans"@Product;
 
 ODBC можно использовать с любыми совместимыми приложениями. Т.к. технология раньше активно продвигалась MS, то в продуктах MS это удобно в особенности. Можно сделать импорт в Access, а можно и в Excel. Для этого нужно создать файл с расширением .dqy, после чего написать в нем (сервер, пользователя и пароль указать нужного):
 
-```text
+```{code}
 XLODBC
 1
 DRIVER={PostgreSQL Unicode};DATABASE=Product;SERVER=127.0.0.1;PORT=5432;UID=<user>;PASSWORD=<passwordd>;SSLmode=disable;ReadOnly=0;Protocol=7.4;FakeOidIndex=0;ShowOidColumn=0;RowVersioning=0;ShowSystemTables=0;ConnSettings=;Fetch=100;Socket=4096;UnknownSizes=0;MaxVarcharSize=255;MaxLongVarcharSize=8190;Debug=0;CommLog=0;Optimizer=0;Ksqo=1;UseDeclareFetch=0;TextAsLongVarchar=1;UnknownsAsLongVarchar=0;BoolsAsChar=1;Parse=0;CancelAsFreeStmt=0;ExtraSysTablePrefixes=dd_;LFConversion=1;UpdatableCursors=1;DisallowPremature=0;TrueIsMinus1=0;BI=0;ByteaAsLongVarBinary=0;UseServerSidePrepare=0;LowerCaseIdentifier=0;GssAuthUseGSS=0;XaOpt=1
